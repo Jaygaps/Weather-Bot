@@ -58,13 +58,7 @@ namespace Weather_Bot
                 bool isWeatherRequest = true;
                 var userMessage = activity.Text;
                 
-                if (userMessage.ToLower().Contains("maps"))
-                {
-                    var request = new GeocodingRequest();
-                    request.Address = "1600 Amphitheatre Parkway";
-                    request.Sensor = false;
-                    var response = new GeocodingService().GetResponse(request);
-                }
+               
                 if (userMessage.ToLower().Contains("converter"))
                 {
                     string[] value = userMessage.Split(' ');
@@ -73,6 +67,10 @@ namespace Weather_Bot
                     if (value[1].ToLower() == "aud")
                     {
                         FinalResult = value[1] + " " + AUD;
+                    }
+                    if (value[1].ToLower() == "nzd")
+                    {
+                        FinalResult = value[1] + " " + NZD;
                     }
                     Activity replyToConversation = activity.CreateReply("Convertion Information");
                     replyToConversation.Recipient = activity.From;
