@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace ContosoBank
 {
-    public class AzureManager
+    public class Amanager
     {
 
-        private static AzureManager instance;
+        private static Amanager instance;
         private MobileServiceClient client;
-        private IMobileServiceTable<BankBot> timelineTable;
+        private IMobileServiceTable<Timings> timelineTable;
 
-        private AzureManager()
+        private Amanager()
         {
             this.client = new MobileServiceClient("http://jayrajbot1.azurewebsites.net");
-            this.timelineTable = this.client.GetTable<BankBot>();
+            this.timelineTable = this.client.GetTable<Timings>();
         }
 
         public MobileServiceClient AzureClient
@@ -26,32 +26,25 @@ namespace ContosoBank
             get { return client; }
         }
 
-        public static AzureManager AzureManagerInstance
+        public static Amanager AzureManagerInstance2
         {
             get
             {
                 if (instance == null)
                 {
-                    instance = new AzureManager();
+                    instance = new Amanager();
                 }
 
                 return instance;
             }
         }
-        public async Task DeleteTimeline(BankBot timeline)
-        {
-            await this.timelineTable.DeleteAsync(timeline);
-        }
-        public async Task UpdateTimeline(BankBot timeline)
-        {
-            await this.timelineTable.UpdateAsync(timeline);
-        }
-        public async Task AddTimeline(BankBot timeline)
+
+        public async Task AddTimeline(Timings timeline)
         {
             await this.timelineTable.InsertAsync(timeline);
         }
 
-        public async Task<List<BankBot>> GetTimelines()
+        public async Task<List<Timings>> GetTimelines()
         {
             return await this.timelineTable.ToListAsync();
         }
