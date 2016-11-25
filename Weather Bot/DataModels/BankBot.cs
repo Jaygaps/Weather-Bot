@@ -24,10 +24,5 @@ namespace ContosoBank.DataModels
         [JsonProperty(PropertyName = "createdAt")]
         public DateTime Date { get; set; }
 
-        [JsonProperty(PropertyName = "day")]
-        public string Day { get; set; }
-
-        [JsonProperty(PropertyName = "hours")]
-        public string Hours { get; set; }
     }
 }

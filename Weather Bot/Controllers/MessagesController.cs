@@ -35,11 +35,8 @@ namespace ContosoBank
 
         public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
-
             if (activity.Type == ActivityTypes.Message)
             {
-
-
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
 
                 StateClient stateClient = activity.GetStateClient();
@@ -87,19 +84,66 @@ namespace ContosoBank
                 }
                 if (thankyou == true)
                 {
-                    Activity thank = activity.CreateReply("You are welcome " + activity.From.Name + ". I am glad, I could be of some help.");
-                    await connector.Conversations.ReplyToActivityAsync(thank);
+                    Activity replyToConversation = activity.CreateReply("You are welcome " + activity.From.Name);
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+                    List<CardAction> cardButtons = new List<CardAction>();
+                    CardAction plButton = new CardAction()
+                    {
+                        Value = "help",
+                        Type = "imBack",
+                        Title = "yes"
+                    };
+                    cardButtons.Add(plButton);
+                    CardAction plButton1 = new CardAction()
+                    {
+                        Value = "bye",
+                        Type = "imBack",
+                        Title = "No"
+                    };
+                    cardButtons.Add(plButton1);
+                    ThumbnailCard plCard = new ThumbnailCard()
+                    {
+                        Title = "Do you need help with more commands?",
+                        Buttons = cardButtons
+                    };
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
+                    return Request.CreateResponse(HttpStatusCode.OK);
                 }
+
                 if (about == true)
                 {
-                    endOutput = "Hello " + activity.From.Name + " This bot is intended for contosobank";
-                    string lmao = "I am here to make your job easier, ask me conversion rates, opening hours, closest ATM's or to retreive your bank balance";
-                   
+                    endOutput = "Hello " + activity.From.Name + " This bot is intended for JazBot";                   
                     Activity shoes1 = activity.CreateReply(endOutput);
                     await connector.Conversations.ReplyToActivityAsync(shoes1);
-                    Activity shoes3 = activity.CreateReply(lmao);
-                    await connector.Conversations.ReplyToActivityAsync(shoes3);
 
+                    Activity replyToConversation = activity.CreateReply("About me");
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: "https://s13.postimg.org/ahasnmoqf/Screen_Shot_2016_11_25_at_3_30_27_AM.png"));
+                    List<CardAction> cardButtons = new List<CardAction>();
+                    CardAction plButton = new CardAction()
+                    {
+                        Value = "http://msa.ms",
+                        Type = "openUrl",
+                        Title = "More information"
+                    };
+                    cardButtons.Add(plButton);
+                    ThumbnailCard plCard = new ThumbnailCard()
+                    {
+                        Text = "I am here to make your job easier, ask me conversion rates, opening hours, closest ATM's or to retreive your bank balance",
+                        Images = cardImages,
+                        Buttons = cardButtons
+                    };
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
+                    return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 if(currencylist == true)
                 {
@@ -119,13 +163,11 @@ namespace ContosoBank
                 }
                 if (greeting1 == true)
                 {
-                    endOutput = "Hello " + activity.From.Name + "\n\n" + "Welcome to the contoso Bank bot!, If you need help guiding through this bot. Type 'help'";
-
+                    endOutput = "Hello " + activity.From.Name + "\n\n" + "Welcome to the Jaz Bank bot!, If you need help guiding through this bot. Type 'help'";
 
                     if (userData.GetProperty<bool>("SentGreeting"))
                     {
                         endOutput = "Hello again " + activity.From.Name;
-
                     }
                     else
                     {
@@ -142,7 +184,7 @@ namespace ContosoBank
                     replyToConversation.Type = "message";
                     replyToConversation.Attachments = new List<Attachment>();
                     List<CardImage> cardImages = new List<CardImage>();
-                    cardImages.Add(new CardImage(url: "https://scontent-syd2-1.xx.fbcdn.net/v/t34.0-12/15151218_661916103967913_1775185452_n.jpg?oh=4de75808133ddd22dfcb98f5052a577e&oe=5836FC16"));
+                    cardImages.Add(new CardImage(url: "https://s18.postimg.org/vg9pw5kwp/Screen_Shot_2016_11_25_at_3_48_58_AM.png"));
                     List<CardAction> cardButtons = new List<CardAction>();
                     HeroCard plCard = new HeroCard()
                     {
@@ -163,6 +205,7 @@ namespace ContosoBank
                 HttpClient client = new HttpClient();
                 string x = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=NZD"));
                 Root12 = JsonConvert.DeserializeObject<currency.RootObject>(x);
+
                 if (userMessage.ToLower().Contains("conversion rate"))
                 {
                     string[] value = userMessage.Split(' ');
@@ -175,7 +218,6 @@ namespace ContosoBank
                     if (value[2].ToLower() == "aud")
                     {
                         FinalResult = "The current " + value[2] + " rate is " + AUD + "\n\n " + "converting " + value[4] + " NZD = " + AUD * lolhaha + " AUD";
-
                     }
                     if (value[2].ToLower() == "jpy")
                     {
@@ -200,66 +242,23 @@ namespace ContosoBank
                     await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     isWeatherRequest = false;
                 }
-
-                if (userMessage.ToLower().Contains("get customer data"))
+                if (userMessage.ToLower().Contains("change my name from"))
                 {
-                    string[] splitting = userMessage.Split(' ');
-
+                    string[] swag = userMessage.Split(' ');
                     List<BankBot> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
-                    endOutput = "";
-                    string l = splitting[3];
                     foreach (BankBot t in timelines)
                     {
-                        if (l == t.Name)
+                        if (swag[4].ToLower() == t.Name)
                         {
-                            endOutput += "Customer: " + t.Name + ", current account: $" + t.CurrentAccount + ", Savings: $" + t.Savings + "\n\n";
-                        }
-                        else
-                        {
-                            endOutput = "customer name is not valid";
-                        }
-                    }
-                    isWeatherRequest = false;
-
-                }
-                if (userMessage.ToLower().Contains("delete customer"))
-                {
-                    string[] delete = userMessage.Split(' ');
-                    List<BankBot> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
-                    foreach (var i in timelines)
-                    {
-                        if (activity.From.Name.Equals(i.Name))
-                        {
-                            await AzureManager.AzureManagerInstance.DeleteTimeline(i);
-                        }
-                        Activity deleteaccount = activity.CreateReply("We have deleted your account :)");
-                        await connector.Conversations.ReplyToActivityAsync(deleteaccount);
-                    }
-                }
-                if (userMessage.ToLower().Contains("update my name to"))
-                {
-                    string[] value = userMessage.Split(' ');
-                    Boolean found = false; ;
-                    List<BankBot> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
-                    foreach (var t in timelines)
-                    {
-                        if (activity.From.Name.Equals(t.Name))
-                        {
-                            t.Name = value[4];
+                            t.Name = swag[6];
+                            endOutput = t.Name;
                             await AzureManager.AzureManagerInstance.UpdateTimeline(t);
-                            Activity updatename = activity.CreateReply("We have updated your name to " + value[4] + ", was that correct");
-                            await connector.Conversations.ReplyToActivityAsync(updatename);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                            found = true;
+                            Activity update = activity.CreateReply("We have updated your name to " + t.Name);
+                            await connector.Conversations.ReplyToActivityAsync(update);
                         }
-                    };
-                    if (found == false)
-                    {
-                        Activity suck = activity.CreateReply("Sorry your name is not in the database");
-                        await connector.Conversations.ReplyToActivityAsync(suck);
-                        return Request.CreateResponse(HttpStatusCode.OK);
+                        
                     }
-                    isWeatherRequest = false;
+                    
                 }
                 if (userMessage.ToLower().Contains("update my balance"))
                 {
@@ -269,7 +268,7 @@ namespace ContosoBank
                 if (userMessage.ToLower().Contains("deposit"))
                 {
                     string[] dep = userMessage.Split(' ');
-                    Boolean found = false; ;
+                    Boolean found = false;
                     List<BankBot> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
                     int currentA = 0;
                     int depositv = 0;
@@ -277,20 +276,100 @@ namespace ContosoBank
                     {
                         currentA = Int32.Parse(t.CurrentAccount);
                         depositv = Int32.Parse(dep[3]);
-                        if (activity.From.Name.Equals(t.Name))
+                        if (dep[0].ToLower().Equals(t.Name.ToLower()))
                         {
                             t.Name = dep[0];
                             currentA += depositv;
                             t.CurrentAccount = "" + currentA;
                             await AzureManager.AzureManagerInstance.UpdateTimeline(t);
-                            Activity updatename = activity.CreateReply("Hello " + dep[0] + " we have deposited $" +depositv + ", your balance is now $" + t.CurrentAccount);
-                            await connector.Conversations.ReplyToActivityAsync(updatename);
+                            Activity updatenam11e = activity.CreateReply("Hello " + dep[0] + " we have deposited $" + depositv + " you now have $" + t.CurrentAccount);
+                            await connector.Conversations.ReplyToActivityAsync(updatenam11e);
                             return Request.CreateResponse(HttpStatusCode.OK);
                             found = true;
                         }
+
                     };
-                    
+                    if (found == false)
+                    {
+                        Activity updatename1 = activity.CreateReply("error: No customer name found in database");
+                        await connector.Conversations.ReplyToActivityAsync(updatename1);
+                        return Request.CreateResponse(HttpStatusCode.OK);
+                    }
                     isWeatherRequest = false;
+                }
+
+                if (userMessage.ToLower().Contains("calculate interest rate for"))
+                {
+                    string[] interest = userMessage.Split(' ');
+                    List<BankBot> timeline = await AzureManager.AzureManagerInstance.GetTimelines();
+                    endOutput = "";
+                    Random rndm = new Random();
+                    int distance = rndm.Next(1, 10);
+                    foreach (var t in timeline)
+                    {
+                        if (interest[4].ToLower().Equals(t.Name.ToLower()))
+                        {
+                            Activity updatehours = activity.CreateReply("The interest rate for " + interest[4] + "'s saving account is " + distance + "%");
+                            await connector.Conversations.ReplyToActivityAsync(updatehours);
+                        }
+                    }
+                }
+
+                if (userMessage.ToLower().Contains("change times"))
+                {
+                    string[] day = userMessage.Split(' ');
+                    List<Timings> timelined = await Amanager.AzureManagerInstance2.GetTimelines();
+                    endOutput = "";
+                    string current = day[2];
+                    foreach(Timings timing in timelined)
+                    {
+                       if (current.ToLower() == timing.Day.ToLower())
+                        {
+                            timing.Hours = day[3];
+                            await Amanager.AzureManagerInstance2.UpdateTimetable1(timing);
+                            Activity updatehours = activity.CreateReply("Hours updated for " + day[2] + " " + day[3]);
+                            await connector.Conversations.ReplyToActivityAsync(updatehours);
+                        }
+                    }
+                }
+
+                if (userMessage.ToLower().Contains("get customer data"))
+                {
+                    string[] splitting = userMessage.Split(' ');
+                    Boolean found1 = false;
+                    List<BankBot> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                    endOutput = "";
+                    string l = splitting[3];
+                    foreach (BankBot t in timelines)
+                    {
+                        if (l == t.Name)
+                        {
+                            endOutput += "Customer: " + t.Name + ", current account: $" + t.CurrentAccount + ", Savings: $" + t.Savings + "\n\n";
+                            found1 = true;
+                        }
+                    };
+                    if (found1 == false)
+                    {
+                        Activity updatename1 = activity.CreateReply("error: No customer name found in database");
+                        await connector.Conversations.ReplyToActivityAsync(updatename1);
+                    }
+                    isWeatherRequest = false;
+                }
+
+                if (userMessage.ToLower().Contains("delete customer"))
+                {
+                    string[] delete = userMessage.Split(' ');
+                    string namedelete = delete[2];
+                    List<BankBot> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                    foreach (var i in timelines)
+                    {
+                        if (namedelete.ToLower() == i.Name.ToLower())
+                        {
+                            await AzureManager.AzureManagerInstance.DeleteTimeline(i);
+                        }
+                    }
+                    Activity deleteaccount = activity.CreateReply("We have deleted your account :) Thank you for being Jaz Bank's Lovely customer");
+                    await connector.Conversations.ReplyToActivityAsync(deleteaccount);
                 }
 
                 if (userMessage.ToLower().Contains("hours"))
@@ -304,6 +383,12 @@ namespace ContosoBank
                     }
                     isWeatherRequest = false;
 
+                }
+
+                if (userMessage.ToLower().Contains("bye"))
+                {
+                    Activity nzd = activity.CreateReply("Goodbye " + activity.From.Name);
+                    await connector.Conversations.ReplyToActivityAsync(nzd);
                 }
 
                 if (userMessage.ToLower().Contains("new customer"))
@@ -321,14 +406,15 @@ namespace ContosoBank
 
                     isWeatherRequest = false;
 
-                    endOutput = "New family member " + value[2] + " added " + "[" + timeline.Date + "]";
+                    endOutput = "New JazBank member " + value[2] + " added " + "[" + timeline.Date + "]";
                 }
-                if (userMessage.ToLower().Contains("closest atm"))
+
+                if (userMessage.ToLower().Contains("closest atm near"))
                 {
                     string[] value = userMessage.Split(' ');
                     Random rndm = new Random();
                     int distance = rndm.Next(1, 3);
-                    value[2] = distance.ToString();
+                    value[3] = distance.ToString();
 
                     Activity replyToConversation = activity.CreateReply("ATM's near by");
                     replyToConversation.Recipient = activity.From;
@@ -346,7 +432,7 @@ namespace ContosoBank
                     ThumbnailCard plCard = new ThumbnailCard()
                     {
                         Subtitle = "Closest ATM to you is... " + value[2] + "KM",
-                        Title = value[2] + " KM",
+                        Title = value[3] + " KM",
                         Images = cardImages,
                         Buttons = cardButtons
                     };

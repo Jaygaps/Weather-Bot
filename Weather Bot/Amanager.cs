@@ -38,7 +38,10 @@ namespace ContosoBank
                 return instance;
             }
         }
-
+        public async Task UpdateTimetable1(Timings timeline)
+        {
+            await this.timelineTable.UpdateAsync(timeline);
+        }
         public async Task AddTimeline(Timings timeline)
         {
             await this.timelineTable.InsertAsync(timeline);
